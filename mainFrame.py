@@ -66,21 +66,7 @@ class MainFrame(Frame):
         self.redraw(canvas_wid,ax,ax2)
 
 
-    def iteracion_primer_orden(self):
-        if(self.pausa==False):
-            self.UN_i = float(self.txtmk.get())
-            self.pk_i = float(self.txtpk.get())
-            self.UN[self.i] = self.UN_i
-            self.pk.append(self.pk_i)
-            self.YN[self.i] = self.a1 * self.YN[self.i - 1] + self.b1 * self.UN[self.i - 1 - self.d] + self.b2 * self.UN[self.i - 2 - self.d] + self.pk[self.i]
-            self.data.append(self.YN[self.i])
-            self.un.append(self.UN[self.i])
-            print(self.i)
-            self.plot()
-            self.i=self.i+1
-            print(self.i)
-            print(self.pausa)
-        root.after(1000, self.iteracion_primer_orden)
+
 
 
 
@@ -103,8 +89,8 @@ class MainFrame(Frame):
 
         Label(self, text="Modelo:").place(x=30, y=90)
 
-        self.btnCalcular = Button(self, text="Configuracion", command=self.ElegirOpciones)
-        self.btnCalcular.place(x=100, y=150)
+        self.btnCalcular = Button(self, text="Seleccionar", command=self.ElegirOpciones)
+        self.btnCalcular.place(x=350, y=90)
 
 
         self.cmbMetodos = Combobox(self, width="20", values=MODELOS, state="readonly")
@@ -120,17 +106,17 @@ class MainFrame(Frame):
         self.create_widgets()
 
         Label(self, text="Coeficiente d:").place(x=30, y=220)
-        self.txtd = Entry(self, width=15)
-        self.txtd.place(x=300, y=220)
+        self.txtd = Entry(self, width=8)
+        self.txtd.place(x=400, y=220)
 
 
-        Label(self, text="Escribe las variables a's (empezando por a1)").place(x=30, y=250)
-        self.txtn = Entry(self, width=15)
-        self.txtn.place(x=300, y=250)
+        Label(self, text="Coeficientes de a's separados por comas (a1,a2,a3,a4,a5)").place(x=30, y=250)
+        self.txtn = Entry(self, width=8)
+        self.txtn.place(x=400, y=250)
 
-        Label(self, text="Escribe las variables a's (empezando por b0)").place(x=30, y=280)
-        self.txtm = Entry(self, width=15)
-        self.txtm.place(x=300, y=280)
+        Label(self, text="Coeficientes de a's separados por comas (a1,a2,a3,a4,a5)").place(x=30, y=280)
+        self.txtm = Entry(self, width=8)
+        self.txtm.place(x=400, y=280)
 
         self.btnEmpezar = Button(self, text="Empezar", command=self.estructura_ARX)
         self.btnEmpezar.place(x=150, y=310)
@@ -145,10 +131,10 @@ class MainFrame(Frame):
     def estructura_ARX(self):
 
         d = int(self.txtd.get())
-        entradas_a = (self.txtn.get().split(" "))
+        entradas_a = (self.txtn.get().split(","))
         aIndex = list(map(float, entradas_a))
 
-        entradas_b = (self.txtm.get().split(" "))
+        entradas_b = (self.txtm.get().split(","))
         bIndex = list(map(float, entradas_b))
 
         startIndex = 0;
@@ -172,8 +158,6 @@ class MainFrame(Frame):
 
         # messagebox.showinfo(title="Entro la funcion", message=str(theta))
         # result = int(self.txtRes.get())
-
-
         self.txtRes.delete(0, 'end')
         self.txtRes.insert(0, c)
         messagebox.showinfo("Resultado", c)
@@ -215,15 +199,32 @@ class MainFrame(Frame):
 
 
 
-        self.btnIteracion = Button(self, text="para", command=self.pausar)
-        self.btnIteracion.place(x=150, y=480)
+        self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
+        self.btnIteracion.place(x=300, y=410)
 
         if(self.pausa==False):
             self.iteracion_primer_orden()
-        root.after(1000, )
+        #root.after(1000, )
 
    # messagebox.showinfo(title="Entro la funcion", message=str(theta))
         # result = int(self.txtRes.get())
+    def iteracion_primer_orden(self):
+        if(self.pausa==False):
+            self.UN_i = float(self.txtmk.get())
+            self.pk_i = float(self.txtpk.get())
+            self.UN[self.i] = self.UN_i
+            self.pk.append(self.pk_i)
+            self.YN[self.i] = self.a1 * self.YN[self.i - 1] + self.b1 * self.UN[self.i - 1 - self.d] + self.b2 * self.UN[self.i - 2 - self.d] + self.pk[self.i]
+            self.data.append(self.YN[self.i])
+            self.un.append(self.UN[self.i])
+
+            self.plot()
+            self.txtRes.delete(0, 'end')
+            self.txtRes.insert(0, self.data)
+
+            self.i=self.i+1
+
+        root.after(1000, self.iteracion_primer_orden)
 
 
 
@@ -259,12 +260,13 @@ class MainFrame(Frame):
         self.txtpk = Entry(self, width=15)
         self.txtpk.place(x=300, y=340)
 
-        self.btnEmpezar = Button(self, text="Empezar", command=self.primer_orden)
-        self.btnEmpezar.place(x=150, y=380)
 
-        Label(self, text="Resultado").place(x=30, y=410)
+        Label(self, text="Resultado").place(x=30, y=380)
         self.txtRes = Entry(self, width=30)
-        self.txtRes.place(x=100, y=410)
+        self.txtRes.place(x=100, y=380)
+
+        self.btnEmpezar = Button(self, text="Empezar", command=self.primer_orden)
+        self.btnEmpezar.place(x=150, y=410)
 
         
 
@@ -272,8 +274,10 @@ class MainFrame(Frame):
 
 
 root = Tk()
-#root.geometry("800x700")
+root.title('Proyecto Ingenieria de Control')
+root.geometry("800x700")
 app = MainFrame(master=root)
+
 app.mainloop()
 
 
