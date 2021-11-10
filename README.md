@@ -43,6 +43,6 @@ Modelo Primer Orden: https://drive.google.com/file/d/1-aJLNNSbMwBc9SRpWtNyA3CMGu
 
 # Documento en excel
 
-Se puede obtener el documento de excel con la simualción de los dos modelos en el siguiente lik:
+Se puede obtener el documento de excel con la simualción de los dos modelos en el siguiente link:
 
 https://drive.google.com/drive/folders/15rWiq1uEcsZmT0TMoa8sehna1xd0NsTH?usp=sharing
