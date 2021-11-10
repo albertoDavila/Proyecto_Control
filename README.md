@@ -29,7 +29,7 @@ Sin embargo, por el momento se requiere pausar el programa para modificar los va
 
 Por otro lado, el modelo general ARX da como salida los valores de la respuesta c(k), esto tanto en un renglón del GUI y en una ventana emergente.
 El programa acepta hasta 5 coeficientes de a's y b's. Es importante tener en cuenta que si no se quiere utilizar un coeficiente se tiene que poner este valor en 0.
-Ejemplo de como deben de ir: 0.7,0,0,0,0.
+Ejemplo de como deben de ir: 0.7,0,0,0,0
 
 Se está trabajando en la integración completa de esta modelo
 
