@@ -1,4 +1,5 @@
-​​# Instalar Python 3 en caso de no tenerlo
+​​
+# Instalar Python 3 en caso de no tenerlo
 
 En el siguiente link se podrá instalar pyhton 3.
 Para el desarrollo de este proyecto se utilizó pyhton 3.7
