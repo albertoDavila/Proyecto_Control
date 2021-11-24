@@ -52,17 +52,6 @@ class MainFrame(Frame):
         # clear window
         self.grid_forget()
 
-    def m(self,index):
-        if (index < 0):
-            return 0
-        else:
-            return 1
-
-    def mArray(self, lenght, startIndex):
-        mArr = []
-        for i in range(lenght):
-            mArr.append(self.m(startIndex - i))
-        return mArr
 
 
     def plot(self):
@@ -93,20 +82,12 @@ class MainFrame(Frame):
 
 
     def create_widgets(self):
-
-
         Label(self, text="Modelo:").place(x=30, y=90)
-
         self.btnCalcular = Button(self, text="Seleccionar", command=self.ElegirOpciones)
         self.btnCalcular.place(x=350, y=90)
-
         self.cmbMetodos = Combobox(self, width="20", values=MODELOS, state="readonly")
         self.cmbMetodos.place(x=100, y=90)
         self.cmbMetodos.current(0)
-
-
-
-
 
 
 
@@ -213,18 +194,21 @@ class MainFrame(Frame):
             self.btnAutomatico['highlightbackground'] == 'red'
             self.Manual_a_Auto = False
             self.pausar()
-            self.primer_orden_widgets()
+            if self.cmbMetodos.get() == MODELOS[2]:
+                self.primer_orden_widgets()
+            else:
+                self.ARX_widgets()
+
 
     def ARX_widgets(self):
         for child in self.winfo_children():
             child.destroy()
 
         self.create_widgets()
-
+        self.cmbMetodos.set(MODELOS[1])
         Label(self, text="Coeficiente d:").place(x=30, y=220)
         self.txtd = Entry(self, width=8)
         self.txtd.place(x=400, y=220)
-
 
         Label(self, text="4 Coeficientes de a's separados por comas (a1,a2,a3, a4)").place(x=30, y=250)
         self.txtA = Entry(self, width=8)
@@ -240,14 +224,14 @@ class MainFrame(Frame):
         self.txtpk = Entry(self, width=15)
         self.txtpk.place(x=300, y=340)
 
-        self.btnEmpezar = Button(self, text="Empezar", command=self.estructura_ARX)
+        self.btnEmpezar = Button(self, text="Empezar", command=self.ARX)
         self.btnEmpezar.place(x=150, y=370)
 
         Label(self, text="Resultado").place(x=30, y=400)
         self.txtRes = Entry(self, width=30)
         self.txtRes.place(x=100, y=400)
 
-    def estructura_ARX(self):
+    def ARX(self):
         self.pausa = False
         self.d = int(self.txtd.get())
         self.entradas_a = (self.txtA.get().split(","))
@@ -343,14 +327,12 @@ class MainFrame(Frame):
         root.after(1000, self.iteracion_primer_orden)
 
 
-
-
     def primer_orden_widgets(self):
 
         for child in self.winfo_children():
             child.destroy()
-
         self.create_widgets()
+        self.cmbMetodos.set(MODELOS[2])
         Label(self, text="Ganancia estática (K):").place(x=30, y=180)
         self.txtK = Entry(self, width=15)
         self.txtK.place(x=300, y=180)
