@@ -56,16 +56,12 @@ class MainFrame(Frame):
     def plot(self):
 
         fig=Figure()
-
         ax = fig.add_subplot(211)
         ax2 = fig.add_subplot(212)
         canvas_wid = FigureCanvasTkAgg(fig, master=root)
         canvas_wid.get_tk_widget().grid(row=0,column=1)
         canvas_wid.draw()
-
         self.redraw(canvas_wid,ax,ax2)
-
-
 
 
 
@@ -74,11 +70,11 @@ class MainFrame(Frame):
         ax.clear()
         #ax.set_xlabel('Tiempo')
         ax.set_ylabel('Respuesta c(k)')
-        ax.plot(self.data)
+        ax.plot(self.ck)
         ax2.clear()
         ax2.set_xlabel('Tiempo')
         ax2.set_ylabel('Entrada m(k)')
-        ax2.plot(self.un)
+        ax2.plot(self.mk)
         canvas.draw()
 
 
@@ -125,8 +121,94 @@ class MainFrame(Frame):
         self.txtRes = Entry(self, width=30)
         self.txtRes.place(x=100, y=340)
 
+    def Automatico_widgets(self):
+        for child in self.winfo_children():
+            child.destroy()
+
+        self.create_widgets()
+
+        Label(self, text="Ganancia estática (Kc):").place(x=30, y=180)
+        self.txtKc = Entry(self, width=15)
+        self.txtKc.place(x=300, y=180)
+
+        Label(self, text="Constante de tiempo integral(Ti):").place(x=30, y=220)
+        self.txtTi = Entry(self, width=15)
+        self.txtTi.place(x=300, y=220)
+
+        Label(self, text="Constante derivativa (Td)").place(x=30, y=250)
+        self.txtTd = Entry(self, width=15)
+        self.txtTd.place(x=300, y=250)
+
+        Label(self, text="Intervalo de Muestreo (T)").place(x=30, y=280)
+        self.txtT = Entry(self, width=15)
+        self.txtT.place(x=300, y=280)
+
+        Label(self, text="Magnitud del escalon p(k)").place(x=30, y=310)
+        self.txtpk = Entry(self, width=15)
+        self.txtpk.place(x=300, y=310)
+
+        Label(self, text="Magnitud del escalon r(k)").place(x=30, y=340)
+        self.txtrk = Entry(self, width=15)
+        self.txtrk.place(x=300, y=340)
 
 
+        Label(self, text="Resultado").place(x=30, y=380)
+        self.txtRes = Entry(self, width=30)
+        self.txtRes.place(x=100, y=380)
+
+        self.btnEmpezar = Button(self, text="Empezar", command=self.PID)
+        self.btnEmpezar.place(x=150, y=410)
+
+    def PID(self):
+        self.pausa = False
+        self.Kc = float(self.txtKc.get())
+        self.Ti = float(self.txtTi.get())
+        self.Td = float(self.txtTd.get())
+        self.T = float(self.txtT.get())
+        self.r0 = float(self.txtrk.get())
+
+        self.B0 = self.Kc(1 + (self.T / self.Ti) + (self.Td / self.T))
+        self.B1 = self.Kc(-1 - (2 * self.Td / self.T))
+        self.B2 = self.Kc(self.Td / self.T)
+
+
+        self.MK = np.zeros(100)
+        self.EK = np.zeros(100)
+        self.PK = np.zeros(100)
+
+        self.i = 0
+        self.mk = []
+        self.pk = []
+        self.ek = []
+
+        self.ck = []
+        self.ek.append(self.r0)
+
+
+        self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
+        self.btnIteracion.place(x=300, y=410)
+
+        if (self.pausa == False):
+            self.iteracion_PID()
+
+    def iteracion_PID(self):
+        if (self.pausa == False):
+            self.EK_i = self.ek[-1]
+            self.EK[self.i] = self.EK_i
+            self.pk_i = float(self.txtpk.get())
+            self.pk.append(self.pk_i)
+            self.MK[self.i] = self.MK[self.i - 1] + self.B0 * self.EK[self.i ]+self.B1 * self.EK[self.i - 1 ] + self.B1 * self.EK[self.i - 1 ] + self.PK[self.i]
+            self.mk.append(self.MK[self.i])
+            self.ek.append(self.EK[self.i])
+            self.pk.append(self.PK[self.i])
+
+            self.plot()
+            self.txtRes.delete(0, 'end')
+            self.txtRes.insert(0, self.mk)
+
+            self.i = self.i + 1
+
+        root.after(1000, self.iteracion_primer_orden)
 
     def estructura_ARX(self):
 
@@ -171,8 +253,6 @@ class MainFrame(Frame):
 
 
     def primer_orden(self):
-
-
         self.pausa= False
         self.K = float(self.txtK.get())
         self.Tau = float(self.txtTau.get())
@@ -189,13 +269,13 @@ class MainFrame(Frame):
 
 
 
-        self.YN = np.zeros(100)
-        self.UN = np.zeros(100)
+        self.CK = np.zeros(100)
+        self.MK = np.zeros(100)
 
         self.i = 0
-        self.data = []
+        self.ck = []
         self.pk = []
-        self.un = []
+        self.mk = []
 
 
 
@@ -210,17 +290,17 @@ class MainFrame(Frame):
         # result = int(self.txtRes.get())
     def iteracion_primer_orden(self):
         if(self.pausa==False):
-            self.UN_i = float(self.txtmk.get())
+            self.MK_i = float(self.txtmk.get())
             self.pk_i = float(self.txtpk.get())
-            self.UN[self.i] = self.UN_i
+            self.MK[self.i] = self.MK_i
             self.pk.append(self.pk_i)
-            self.YN[self.i] = self.a1 * self.YN[self.i - 1] + self.b1 * self.UN[self.i - 1 - self.d] + self.b2 * self.UN[self.i - 2 - self.d] + self.pk[self.i]
-            self.data.append(self.YN[self.i])
-            self.un.append(self.UN[self.i])
+            self.CK[self.i] = self.a1 * self.CK[self.i - 1] + self.b1 * self.MK[self.i - 1 - self.d] + self.b2 * self.MK[self.i - 2 - self.d] + self.pk[self.i]
+            self.ck.append(self.CK[self.i])
+            self.mk.append(self.MK[self.i])
 
             self.plot()
             self.txtRes.delete(0, 'end')
-            self.txtRes.insert(0, self.data)
+            self.txtRes.insert(0, self.ck)
 
             self.i=self.i+1
 
