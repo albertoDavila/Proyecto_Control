@@ -28,6 +28,18 @@ class MainFrame(Frame):
         #self.pack()
         self.create_widgets()
 
+        self.mk = []
+        self.pk = []
+        self.ek = []
+        self.ck = []
+
+        self.MK = np.zeros(100)
+        self.EK = np.zeros(100)
+        self.PK = np.zeros(100)
+        self.CK = np.zeros(100)
+        self.Manual_a_Auto=False
+
+
 
     def ElegirOpciones(self):
         if (self.cmbMetodos.get() == MODELOS[1]):
@@ -95,6 +107,8 @@ class MainFrame(Frame):
 
 
 
+
+
     def ARX_widgets(self):
         for child in self.winfo_children():
             child.destroy()
@@ -139,17 +153,26 @@ class MainFrame(Frame):
         self.txtTd = Entry(self, width=15)
         self.txtTd.place(x=300, y=250)
 
-        Label(self, text="Intervalo de Muestreo (T)").place(x=30, y=280)
-        self.txtT = Entry(self, width=15)
-        self.txtT.place(x=300, y=280)
-
         Label(self, text="Magnitud del escalon p(k)").place(x=30, y=310)
         self.txtpk = Entry(self, width=15)
         self.txtpk.place(x=300, y=310)
 
-        Label(self, text="Magnitud del escalon r(k)").place(x=30, y=340)
-        self.txtrk = Entry(self, width=15)
-        self.txtrk.place(x=300, y=340)
+        if self.Manual_a_Auto==False:
+            Label(self, text="Intervalo de Muestreo (T)").place(x=30, y=280)
+            self.txtT = Entry(self, width=15)
+            self.txtT.place(x=300, y=280)
+
+            Label(self, text="Magnitud del escalon r(k)").place(x=30, y=340)
+            self.txtrk = Entry(self, width=15)
+            self.txtrk.place(x=300, y=340)
+
+        elif self.Manual_a_Auto == True:
+            print('entro')
+            self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
+            self.btnIteracion.place(x=280, y=410)
+            self.btnAutomatico = Button(self, text="Modo automático", highlightbackground='green',
+                                        command=self.Setup_Modo_Automatico)
+            self.btnAutomatico.place(x=350, y=410)
 
 
         Label(self, text="Resultado").place(x=30, y=380)
@@ -159,13 +182,23 @@ class MainFrame(Frame):
         self.btnEmpezar = Button(self, text="Empezar", command=self.PID)
         self.btnEmpezar.place(x=150, y=410)
 
+
     def PID(self):
         self.pausa = False
         self.Kc = float(self.txtKc.get())
         self.Ti = float(self.txtTi.get())
         self.Td = float(self.txtTd.get())
-        self.T = float(self.txtT.get())
-        self.r0 = float(self.txtrk.get())
+
+        if self.Manual_a_Auto==False:
+            self.r0 = float(self.txtrk.get())
+            self.T = float(self.txtT.get())
+            self.ek.append(self.r0)
+        else:
+            self.r0 = self.ck[-1]
+            self.ek=[]
+            self.ek.append(0)
+            self.EK = np.zeros(100)
+            print('valor de Kc', self.Kc)
 
         self.B0 = self.Kc(1 + (self.T / self.Ti) + (self.Td / self.T))
         self.B1 = self.Kc(-1 - (2 * self.Td / self.T))
@@ -174,16 +207,10 @@ class MainFrame(Frame):
 
         self.MK = np.zeros(100)
         self.EK = np.zeros(100)
+
         self.PK = np.zeros(100)
 
         self.i = 0
-        self.mk = []
-        self.pk = []
-        self.ek = []
-
-        self.ck = []
-        self.ek.append(self.r0)
-
 
         self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
         self.btnIteracion.place(x=300, y=410)
@@ -191,10 +218,10 @@ class MainFrame(Frame):
         if (self.pausa == False):
             self.iteracion_PID()
 
+
     def iteracion_PID(self):
         if (self.pausa == False):
-            self.EK_i = self.ek[-1]
-            self.EK[self.i] = self.EK_i
+            self.EK[self.i] = self.ek[-1]
             self.pk_i = float(self.txtpk.get())
             self.pk.append(self.pk_i)
             self.MK[self.i] = self.MK[self.i - 1] + self.B0 * self.EK[self.i ]+self.B1 * self.EK[self.i - 1 ] + self.B1 * self.EK[self.i - 1 ] + self.PK[self.i]
@@ -208,7 +235,24 @@ class MainFrame(Frame):
 
             self.i = self.i + 1
 
+
+
         root.after(1000, self.iteracion_primer_orden)
+
+    def Setup_Modo_Automatico(self):
+        if self.btnAutomatico['highlightbackground']=='red':
+
+            self.btnAutomatico['highlightbackground'] = 'green'
+            self.Manual_a_Auto=True
+            self.pausar()
+            self.Automatico_widgets()
+        else:
+            self.btnAutomatico['highlightbackground'] == 'red'
+            self.Manual_a_Auto = False
+            self.pausar()
+            self.primer_orden_widgets()
+
+
 
     def estructura_ARX(self):
 
@@ -266,21 +310,15 @@ class MainFrame(Frame):
         self.a1 = np.exp(-self.T / self.Tau)
         self.b1 = self.K * (1 - np.exp(-(self.m * self.T) / self.Tau))
         self.b2 = self.K * (np.exp(-(self.m * self.T) / self.Tau) - np.exp(-self.T / self.Tau))
-
-
-
-        self.CK = np.zeros(100)
-        self.MK = np.zeros(100)
-
         self.i = 0
-        self.ck = []
-        self.pk = []
-        self.mk = []
-
-
+        self.mk.append(float(self.txtpk.get()))
+        self.pk.append(float(self.txtpk.get()))
 
         self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
-        self.btnIteracion.place(x=300, y=410)
+        self.btnIteracion.place(x=280, y=410)
+
+        self.btnAutomatico = Button(self, text="Modo automático", highlightbackground='red', command=self.Setup_Modo_Automatico)
+        self.btnAutomatico.place(x=350, y=410)
 
         if(self.pausa==False):
             self.iteracion_primer_orden()
@@ -290,13 +328,12 @@ class MainFrame(Frame):
         # result = int(self.txtRes.get())
     def iteracion_primer_orden(self):
         if(self.pausa==False):
-            self.MK_i = float(self.txtmk.get())
-            self.pk_i = float(self.txtpk.get())
-            self.MK[self.i] = self.MK_i
-            self.pk.append(self.pk_i)
-            self.CK[self.i] = self.a1 * self.CK[self.i - 1] + self.b1 * self.MK[self.i - 1 - self.d] + self.b2 * self.MK[self.i - 2 - self.d] + self.pk[self.i]
+            self.MK[self.i] = self.mk[-1]
+            self.PK[self.i] = self.pk[-1]
+            self.CK[self.i] = self.a1 * self.CK[self.i - 1] + self.b1 * self.MK[self.i - 1 - self.d] + self.b2 * self.MK[self.i - 2 - self.d] + self.PK[self.i]
             self.ck.append(self.CK[self.i])
             self.mk.append(self.MK[self.i])
+            self.pk.append(self.PK[self.i])
 
             self.plot()
             self.txtRes.delete(0, 'end')
@@ -347,6 +384,8 @@ class MainFrame(Frame):
 
         self.btnEmpezar = Button(self, text="Empezar", command=self.primer_orden)
         self.btnEmpezar.place(x=150, y=410)
+
+
 
         
 
