@@ -25,12 +25,12 @@ O abrir el programa en cualquier IDE y ejecutar el programa
 
 # Instrucciones de uso
 
-El Programa funciona con dos modelos: primer orden y AEX
+El Programa funciona con dos modelos: primer orden y ARX
 
 Para la planta ARX, el programa necesita los 4 coeficientes  de a's y b's. Es importante tener en cuenta que si no se quiere utilizar un coeficiente se tiene que poner este valor en 0.
 Ejemplo de como deben de ir: 0.7,0,0,0,0
 
-Si se tiene alguún Problema se pude dar click en el boton de reiniciar programa. De este modo toda la información queda congelada y se pueden ingresar los valores sin ningun problema 
+Si se tiene algún Problema se pude dar click en el boton de reiniciar programa. De este modo toda la información queda congelada y se pueden ingresar los valores sin ningun problema
 
 # Google Colab
 
@@ -42,6 +42,6 @@ Modelo Primer Orden: https://drive.google.com/file/d/1-aJLNNSbMwBc9SRpWtNyA3CMGu
 
 # Documento en excel
 
-Se puede obtener el documento de excel con la simualción de los dos modelos en el siguiente link:
+Se puede obtener el documento de excel con la simulación de los dos modelos en el siguiente link:
 
 https://drive.google.com/drive/folders/15rWiq1uEcsZmT0TMoa8sehna1xd0NsTH?usp=sharing
