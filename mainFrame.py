@@ -6,6 +6,7 @@
 from tkinter import Label, Button, Entry, Frame, Tk, messagebox, filedialog
 import tkinter as tk
 from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,NavigationToolbar2Tk)
 from tkinter.ttk import Combobox
 import pandas as pd
@@ -26,6 +27,7 @@ class MainFrame(Frame):
         self.master = master
         self.grid()
         #self.pack()
+
         self.create_widgets()
 
         self.mk = []
@@ -38,8 +40,12 @@ class MainFrame(Frame):
         self.EK = np.zeros(100)
         self.PK = np.zeros(100)
         self.CK = np.zeros(100)
+        self.Is_graph=False
 
         self.Modo='Manual'
+        self.Modelo_actual='Niguno'
+        self.create_widgets()
+
 
 
 
@@ -57,7 +63,7 @@ class MainFrame(Frame):
 
 
     def plot(self):
-
+        self.Is_graph=True
         fig=Figure()
         ax = fig.add_subplot(211)
         ax2 = fig.add_subplot(212)
@@ -81,7 +87,13 @@ class MainFrame(Frame):
         ax2.set_xlabel('Tiempo')
         ax2.set_ylabel('Valor')
         ax2.plot(self.mk)
+        ax2.plot(self.pk)
+        ax2.legend(['m(k)', 'p(k)'])
+        print('el MK es', self.mk)
+        print('el PK es', self.pk)
         canvas.draw()
+
+
 
 
 
@@ -93,6 +105,18 @@ class MainFrame(Frame):
         self.cmbMetodos = Combobox(self, width="20", values=MODELOS, state="readonly")
         self.cmbMetodos.place(x=100, y=90)
         self.cmbMetodos.current(0)
+        self.btnReiniciar = Button(self, text="Reiniciar Programa", command=self.resetAll)
+        self.btnReiniciar.place(x=350, y=120)
+
+
+
+
+
+    def resetAll(self):
+        for child in self.winfo_children():
+            child.destroy()
+        self.create_widgets()
+
 
 
 
@@ -156,21 +180,23 @@ class MainFrame(Frame):
             self.ek.append(self.r0)
         else:
             self.r0 = float(self.txtrk.get())
-            self.ek=[]
-            self.ek.append(0)
-            self.EK = np.zeros(100)
+            self.ek.append(self.r0)
+
+
+        print('Valor de Kc', self.Kc)
+        print('Valor de T', self.T)
+        print('Valor de Ti', self.Ti)
+        print('Valor de Td', self.Td)
 
 
 
-        self.B0 = self.Kc(1 + (self.T / self.Ti) + (self.Td / self.T))
-        self.B1 = self.Kc(-1 - (2 * self.Td / self.T))
-        self.B2 = self.Kc(self.Td / self.T)
-        self.MK = np.zeros(100)
-        self.EK = np.zeros(100)
-        self.PK = np.zeros(100)
+        self.B0 = self.Kc*(1 + (self.T / self.Ti) + (self.Td / self.T))
+        self.B1 = self.Kc*(-1 - (2 * self.Td / self.T))
+        self.B2 = self.Kc*(self.Td / self.T)
+
         self.i = 0
         self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
-        self.btnIteracion.place(x=300, y=410)
+        self.btnIteracion.place(x=280, y=410)
 
         if (self.pausa == False):
             self.iteracion_PID()
@@ -180,7 +206,7 @@ class MainFrame(Frame):
         if (self.pausa == False):
             self.EK[self.i] = self.ek[-1]
             self.pk_i = float(self.txtpk.get())
-            self.pk.append(self.pk_i)
+            self.PK[self.i] = self.pk_i
             self.MK[self.i] = self.MK[self.i - 1] + self.B0 * self.EK[self.i ]+self.B1 * self.EK[self.i - 1 ] + self.B1 * self.EK[self.i - 1 ] + self.PK[self.i]
             self.mk.append(self.MK[self.i])
             self.ek.append(self.EK[self.i])
@@ -193,7 +219,11 @@ class MainFrame(Frame):
             self.txtRes.insert(0, self.mk)
             self.i = self.i + 1
 
-        root.after(1000, self.iteracion_primer_orden)
+
+        if(self.Modelo_actual=='Primer orden'):
+            root.after(1000, self.iteracion_primer_orden)
+        elif(self.Modelo_actual=='ARX'):
+            root.after(1000, self.iteracion_ARX())
 
     def Setup_Modo_Automatico(self):
         if self.btnAutomatico['highlightbackground']=='red':
@@ -205,9 +235,9 @@ class MainFrame(Frame):
             self.btnAutomatico['highlightbackground'] == 'red'
             self.Modo = 'Manual'
             self.pausar()
-            if self.cmbMetodos.get() == MODELOS[2]:
+            if self.Modelo_actual=='Primer orden':
                 self.primer_orden_widgets()
-            elif self.cmbMetodos.get() == MODELOS[1]:
+            elif self.Modelo_actual=='ARX':
                 self.ARX_widgets()
 
 
@@ -243,6 +273,7 @@ class MainFrame(Frame):
         self.txtRes.place(x=100, y=400)
 
     def ARX(self):
+        self.Modelo_actual='ARX'
         self.pausa = False
         self.d = int(self.txtd.get())
         self.entradas_a = (self.txtA.get().split(","))
@@ -262,17 +293,24 @@ class MainFrame(Frame):
         self.btnAutomatico.place(x=350, y=430)
 
         if (self.pausa == False):
-            self.iteracion_ARK()
+            self.iteracion_ARX()
 
-    def iteracion_ARK(self):
+    def iteracion_ARX(self):
         if(self.pausa==False):
             self.MK[self.i] = self.mk[-1]
             self.PK[self.i] = self.pk[-1]
             self.CK[self.i] = self.aIndex[0] * self.CK[self.i - 1] + self.aIndex[1] * self.CK[self.i - 2]+ self.aIndex[2] * self.CK[self.i - 3]+self.aIndex[3] * self.CK[self.i - 4]+self.bIndex[0] * self.MK[self.i - 1] + self.bIndex[1] * self.MK[self.i - 2]+ self.bIndex[2] * self.MK[self.i - 3]+self.bIndex[3] * self.MK[self.i - 4] + self.PK[self.i]
+
             self.ck.append(self.CK[self.i])
             self.mk.append(self.MK[self.i])
-            self.pk.append(self.PK[self.i])
-            self.rk.append(self.CK[self.i])
+
+            if self.Modo == 'Manual':
+                self.rk.append(self.CK[self.i])
+                self.pk.append(self.PK[self.i])
+            else:
+                self.rk.append(float(self.txtrk.get()))
+                self.pk.append(float(self.txtpk.get()))
+
 
             self.plot()
             self.txtRes.delete(0, 'end')
@@ -280,7 +318,11 @@ class MainFrame(Frame):
 
             self.i=self.i+1
 
-        root.after(1000, self.iteracion_ARK)
+        if self.Modo == 'Manual':
+            root.after(1000, self.iteracion_ARX)
+        elif self.Modo == 'Automatico':
+            root.after(1000, self.iteracion_PID)
+
 
 
 
@@ -291,6 +333,7 @@ class MainFrame(Frame):
 
     def primer_orden(self):
         self.pausa= False
+        self.Modelo_actual='Primer orden'
         self.K = float(self.txtK.get())
         self.Tau = float(self.txtTau.get())
         self.ThetaP = float(self.txtThetaP.get())
@@ -327,24 +370,26 @@ class MainFrame(Frame):
             self.CK[self.i] = self.a1 * self.CK[self.i - 1] + self.b1 * self.MK[self.i - 1 - self.d] + self.b2 * self.MK[self.i - 2 - self.d] + self.PK[self.i]
             self.ck.append(self.CK[self.i])
             self.mk.append(self.MK[self.i])
-            self.pk.append(self.PK[self.i])
-
             if self.Modo=='Manual':
                 self.rk.append(self.CK[self.i])
+                self.pk.append(self.PK[self.i])
             else:
                 self.rk.append(float(self.txtrk.get()))
+                self.pk.append(float(self.txtpk.get()))
 
             self.plot()
             self.txtRes.delete(0, 'end')
             self.txtRes.insert(0, self.ck)
 
             self.i=self.i+1
+        if self.Modo == 'Manual':
+            root.after(1000, self.iteracion_primer_orden)
+        elif self.Modo =='Automatico':
+            root.after(1000, self.iteracion_PID)
 
-        root.after(1000, self.iteracion_primer_orden)
 
 
     def primer_orden_widgets(self):
-
         for child in self.winfo_children():
             child.destroy()
         self.create_widgets()
