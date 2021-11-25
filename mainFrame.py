@@ -32,12 +32,14 @@ class MainFrame(Frame):
         self.pk = []
         self.ek = []
         self.ck = []
+        self.rk=[]
 
         self.MK = np.zeros(100)
         self.EK = np.zeros(100)
         self.PK = np.zeros(100)
         self.CK = np.zeros(100)
-        self.Manual_a_Auto=False
+
+        self.Modo='Manual'
 
 
 
@@ -70,11 +72,14 @@ class MainFrame(Frame):
     def redraw(self, canvas,ax,ax2):
         ax.clear()
         #ax.set_xlabel('Tiempo')
-        ax.set_ylabel('Respuesta c(k)')
+        ax.set_ylabel('Valor')
         ax.plot(self.ck)
+        ax.plot(self.rk)
+        ax.legend(['c(k)', 'r(k)'])
+
         ax2.clear()
         ax2.set_xlabel('Tiempo')
-        ax2.set_ylabel('Entrada m(k)')
+        ax2.set_ylabel('Valor')
         ax2.plot(self.mk)
         canvas.draw()
 
@@ -113,16 +118,18 @@ class MainFrame(Frame):
         self.txtpk = Entry(self, width=15)
         self.txtpk.place(x=300, y=310)
 
-        if self.Manual_a_Auto==False:
+        Label(self, text="Magnitud del escalon r(k)").place(x=30, y=340)
+        self.txtrk = Entry(self, width=15)
+        self.txtrk.place(x=300, y=340)
+
+        if self.Modo=='Manual':
             Label(self, text="Intervalo de Muestreo (T)").place(x=30, y=280)
             self.txtT = Entry(self, width=15)
             self.txtT.place(x=300, y=280)
 
-            Label(self, text="Magnitud del escalon r(k)").place(x=30, y=340)
-            self.txtrk = Entry(self, width=15)
-            self.txtrk.place(x=300, y=340)
 
-        elif self.Manual_a_Auto == True:
+
+        elif self.Modo == 'Automatico':
             self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
             self.btnIteracion.place(x=280, y=410)
             self.btnAutomatico = Button(self, text="Modo automático", highlightbackground='green',
@@ -143,16 +150,17 @@ class MainFrame(Frame):
         self.Kc = float(self.txtKc.get())
         self.Ti = float(self.txtTi.get())
         self.Td = float(self.txtTd.get())
-        if self.Manual_a_Auto==False:
-            self.r0 = float(self.txtrk.get())
+        if self.Modo=='Manual':
+            self.r0 = self.ck[-1]
             self.T = float(self.txtT.get())
             self.ek.append(self.r0)
         else:
-            self.r0 = self.ck[-1]
+            self.r0 = float(self.txtrk.get())
             self.ek=[]
             self.ek.append(0)
             self.EK = np.zeros(100)
-            print('valor de Kc', self.Kc)
+
+
 
         self.B0 = self.Kc(1 + (self.T / self.Ti) + (self.Td / self.T))
         self.B1 = self.Kc(-1 - (2 * self.Td / self.T))
@@ -177,6 +185,11 @@ class MainFrame(Frame):
             self.mk.append(self.MK[self.i])
             self.ek.append(self.EK[self.i])
             self.pk.append(self.PK[self.i])
+            print(self.cmbMetodos.get() )
+
+
+
+
             self.plot()
             self.txtRes.delete(0, 'end')
             self.txtRes.insert(0, self.mk)
@@ -187,12 +200,12 @@ class MainFrame(Frame):
     def Setup_Modo_Automatico(self):
         if self.btnAutomatico['highlightbackground']=='red':
             self.btnAutomatico['highlightbackground'] = 'green'
-            self.Manual_a_Auto=True
+            self.Modo='Automatico'
             self.pausar()
             self.Automatico_widgets()
         else:
             self.btnAutomatico['highlightbackground'] == 'red'
-            self.Manual_a_Auto = False
+            self.Modo = 'Manual'
             self.pausar()
             if self.cmbMetodos.get() == MODELOS[2]:
                 self.primer_orden_widgets()
@@ -240,7 +253,6 @@ class MainFrame(Frame):
         self.bIndex = list(map(float, self.entradas_b))
         self.i = 0
 
-
         self.mk.append(float(self.txtpk.get()))
         self.pk.append(float(self.txtpk.get()))
 
@@ -262,6 +274,7 @@ class MainFrame(Frame):
             self.ck.append(self.CK[self.i])
             self.mk.append(self.MK[self.i])
             self.pk.append(self.PK[self.i])
+            self.rk.append(self.CK[self.i])
 
             self.plot()
             self.txtRes.delete(0, 'end')
@@ -317,6 +330,11 @@ class MainFrame(Frame):
             self.ck.append(self.CK[self.i])
             self.mk.append(self.MK[self.i])
             self.pk.append(self.PK[self.i])
+
+            if self.Modo=='Manual':
+                self.rk.append(self.CK[self.i])
+            else:
+                self.rk.append(float(self.txtrk.get()))
 
             self.plot()
             self.txtRes.delete(0, 'end')
