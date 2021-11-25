@@ -188,8 +188,6 @@ class MainFrame(Frame):
             print(self.cmbMetodos.get() )
 
 
-
-
             self.plot()
             self.txtRes.delete(0, 'end')
             self.txtRes.insert(0, self.mk)
@@ -209,7 +207,7 @@ class MainFrame(Frame):
             self.pausar()
             if self.cmbMetodos.get() == MODELOS[2]:
                 self.primer_orden_widgets()
-            else:
+            elif self.cmbMetodos.get() == MODELOS[1]:
                 self.ARX_widgets()
 
 
