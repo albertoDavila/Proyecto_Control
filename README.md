@@ -21,17 +21,16 @@ Ir a la carpeta donde se encuentran los archivos y correr la siguiente linea de 
 ```
 pyhton main.py
 ```
+O abrir el programa en cualquier IDE y ejecutar el programa
 
 # Instrucciones de uso
 
-El modelo que está más avanzado es el de "Modelo de primer orden". Por el momento este modelo muestra los resultados de la salida c(k) y grafica estos valores y la entrada m(k).
-Sin embargo, por el momento se requiere pausar el programa para modificar los valores.
+El Programa funciona con dos modelos: primer orden y AEX
 
-Por otro lado, el modelo general ARX da como salida los valores de la respuesta c(k), esto tanto en un renglón del GUI y en una ventana emergente.
-El programa acepta hasta 5 coeficientes de a's y b's. Es importante tener en cuenta que si no se quiere utilizar un coeficiente se tiene que poner este valor en 0.
+Para la planta ARX, el programa necesita los 4 coeficientes  de a's y b's. Es importante tener en cuenta que si no se quiere utilizar un coeficiente se tiene que poner este valor en 0.
 Ejemplo de como deben de ir: 0.7,0,0,0,0
 
-Se está trabajando en la integración completa de esta modelo
+Si se tiene alguún Problema se pude dar click en el boton de reiniciar programa. De este modo toda la información queda congelada y se pueden ingresar los valores sin ningun problema 
 
 # Google Colab
 

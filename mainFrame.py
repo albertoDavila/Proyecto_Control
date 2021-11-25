@@ -4,16 +4,10 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
 from tkinter import Label, Button, Entry, Frame, Tk, messagebox, filedialog
-import tkinter as tk
 from matplotlib.figure import Figure
-from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,NavigationToolbar2Tk)
 from tkinter.ttk import Combobox
-import pandas as pd
 import numpy as np
-import matplotlib.pylab as plt
-import time
-from IPython import display
 
 
 MODELOS=['Elija una opcion','Modelo general estructura ARX', 'Modelo de Primer Orden']
